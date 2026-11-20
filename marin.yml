@@ -1,0 +1,23 @@
+schema: 1
+
+project:
+  name: Marin Pulse
+  repo: marin-pulse
+  type: app
+  owner: County of Marin
+  audience: staff
+  status: alpha
+  test: false
+
+platform:
+  shell: 1.25.1
+  template: manual
+
+deployment:
+  target: github-pages
+  url: https://marincountygov.github.io/marin-pulse/
+
+ai:
+  used: false
+
+services: none
