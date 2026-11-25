@@ -386,19 +386,26 @@ class PageTests(unittest.TestCase):
             if page.name == "index.html":
                 continue
             html = page.read_text(encoding="utf-8")
-            about = re.search(r'<div id="about" data-tab-section="about" hidden>(.*?)</div><', html, re.S)
+            about = re.search(r'<div id="about" data-tab-section="about" hidden>(.*?)</div>(?=<(?:section|div) (?:class="[^"]*" )?(?:id|data-)[^>]*(?:hidden|data-tab)|<div id=")', html, re.S)
             self.assertIsNotNone(about, f"{page.name} has an About tab")
             has = 'id="census-heading"' in about.group(1)
             if page.stem not in with_geoid:
                 self.assertFalse(has, f"{page.name} has no Census area, so no Census section")
                 continue
             self.assertTrue(has, f"{page.name} shows its Census statistics in the About tab")
-            census = re.search(r'<section class="section" aria-labelledby="census-heading">(.*?)</section>', about.group(1), re.S).group(1)
-            self.assertIn("<dt>Total population</dt>", census)
-            self.assertRegex(census, r"<dt>Total population</dt><dd>[\d,]+( \u00b1 [\d,]+)?</dd>")
+            census = re.search(r'<section class="section" aria-labelledby="census-heading">(.*?)</p></section>', about.group(1), re.S).group(1)
+            # the same as a place's page in Marin Census: a table for each topic, four columns, every measure
+            self.assertEqual(census.count("<table>"), 10, f"{page.name} has a table for each topic")
+            self.assertEqual(census.count('class="place-topic"'), 10)
+            self.assertRegex(census, r'<th scope="row">Total population</th><td class="census-cell census-cell--estimate"><span class="census-value">[\d,]+</span></td><td>(\u00b1 [\d,]+)?</td>')
+            self.assertIn('<th scope="col">Margin of error (90%)</th>', census)
+            self.assertIn('<th scope="col">Out of</th>', census)
+            self.assertGreaterEqual(census.count("<tr><th scope=\"row\">"), 41, f"{page.name} shows every measure")
             self.assertIn("American Community Survey 5-year estimates, 2020\u20132024", census)
-            self.assertNotRegex(census, r"(?i)margin of error|confidence")
+            source = re.search(r"<p>Source: (.*?)</p>", census).group(1)
+            self.assertNotRegex(source, r"(?i)margin of error|confidence")
             self.assertIn(f'href="https://marincountygov.github.io/marin-census/?place={page.stem}"', census)
+            self.assertNotIn("<dl", census, "the statistics are tables, not a list of facts")
         self.assertNotIn("census-heading", (ROOT / "places/marin-district-3.html").read_text(encoding="utf-8"))
         self.assertNotIn("census-heading", (ROOT / "places/civic-center.html").read_text(encoding="utf-8"))
 
@@ -454,7 +461,7 @@ class PageTests(unittest.TestCase):
         self.assertIn('id="dash-districts"', greenbrae)
         novato = place("novato.html")
         self.assertIn("<dt>Districts</dt>", novato)
-        about = re.search(r'<dl class="org-facts">.*?</dl>', novato, re.S).group(0)
+        about = re.search(r'<dl class="details">.*?</dl>', novato, re.S).group(0)
         self.assertEqual(about.count("(partly)"), 2, "a city in two districts is partly in each")
         district = place("marin-district-2.html")
         self.assertIn("<h3>Cities and towns</h3>", district)
