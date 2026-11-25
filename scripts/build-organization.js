@@ -674,7 +674,7 @@ const projects = JSON.parse(fs.readFileSync(path.join(ROOT, 'projects', 'data', 
 const projectCard = (x, from) => `<article class="app-card app-card--secondary"><span class="app-card__icon" aria-hidden="true"><svg viewBox="0 0 24 24">${ICON_TIMELINE}</svg></span><h3><a href="${rel(from, `projects/${x.id}.html`)}">${esc(x.name)}</a></h3></article>`;
 
 function projectsIndex() {
-  const csvs = [{ id: 'table', label: 'projects', rows: [['Name', 'Marin Reach', 'Marin Mentions', 'Marin Links'], ...projects.map((x) => [x.name, x.reach ? 'Yes' : '', x.mentions ? 'Yes' : '', x.links ? x.links.code : ''])] }];
+  const csvs = [{ id: 'table', label: 'projects', rows: [['Name', 'Marin Mentions', 'Marin Links'], ...projects.map((x) => [x.name, x.mentions ? 'Yes' : '', x.links ? x.links.code : ''])] }];
   const body = `<section class="hero"><h1>Projects</h1><p class="lede">The projects of the County of Marin.</p>${actions('projects', '#main', false, csvs)}</section>` +
     `<section class="docs-grid" aria-label="Projects">${projects.map((x) => projectCard(x, 'projects')).join('')}</section>` + jsonBlock(null, '../organization/page-data.js', csvs);
   return shell('Projects', 'The projects of the County of Marin.', [['Marin Pulse', '../index.html'], ['Projects', null]], body, ICON_TIMELINE);
