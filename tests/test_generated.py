@@ -123,14 +123,12 @@ class PageTests(unittest.TestCase):
         # Dashboard first, then About; Marin Links has no tab.
         self.assertEqual(labels[:2], ["Dashboard", "About"])
         self.assertNotIn("Links", labels)
-        # Campaigns (the Reach projects the agency is in) are a sub-tab of Reach, between Home and Stats, each
-        # linking to Reach filtered to that project. They are not a tab of their own.
+        # Marin Reach is hidden on MarinOS: it has no tab, Dashboard card or link on a page (organization/links.json has no "reach" app).
+        self.assertNotIn("marin-reach", text)
+        self.assertNotIn("Reach sections", text)
         # The link under Mentions opens Marin Mentions on the past 60 days, filtered to the organization.
         self.assertRegex(text, r'href="https://[^"]*marin-mentions/\?time=60d&amp;monitors=[^"]+">[^<]* Mentions</a>')
         self.assertNotIn("Campaigns", labels)
-        reach = re.search(r'aria-label="Reach sections">(.*?)</nav>', text, re.S).group(1)
-        self.assertEqual(re.findall(r">([^<]+)</a>", reach), ["Home", "Campaigns", "Stats"])
-        self.assertRegex(text, r'data-group="project" data-group-link="[^"]*\?project=\{value\}"')
         self.assertNotIn("Overview", labels)
         # The default view is the Dashboard, and it links to the other tabs for more.
         self.assertLess(text.index('data-tab-section="dashboard"'), text.index('data-tab-section="about"'))
@@ -141,7 +139,7 @@ class PageTests(unittest.TestCase):
         mentions = re.search(r'id="dash-mentions">.*?</section>', dash, re.S).group(0)
         self.assertRegex(mentions, r'<p class="org-dash__more"><a href="https://[^"]*marin-mentions/\?time=60d&amp;monitors=[^"]+">[^<]* Mentions</a></p>')
         self.assertNotIn('href="#mentions"', mentions)
-        # Divisions and Programs are tabs only; Mentions and Reach follow the Budget.
+        # Divisions and Programs are tabs only; Mentions follows the Budget.
         self.assertIn('id="dash-divisions"', dash)
         self.assertIn('id="dash-programs"', dash)
         self.assertNotIn('id="dash-links"', dash)
@@ -425,7 +423,7 @@ class PageTests(unittest.TestCase):
         district = (ROOT / "places/marin-district-3.html").read_text(encoding="utf-8")
         self.assertIn("Supervisor", district)
         self.assertIn("monitors=marin-district-3", district)
-        self.assertIn('data-match="geographicAreas" data-value="District 3"', district)
+        self.assertNotIn("marin-reach", district)  # Marin Reach is hidden on MarinOS
         place = lambda name: (ROOT / "places" / name).read_text(encoding="utf-8")
         d4 = place("marin-district-4.html")
         for heading in ("Areas", "Regions"):
@@ -435,7 +433,7 @@ class PageTests(unittest.TestCase):
         self.assertIn("<dt>Type</dt><dd>Area</dd>", oak)
         self.assertRegex(oak, r"<dt>District</dt><dd><a href=\"marin-district-2.html\">District 2</a></dd>")
         venue = (ROOT / "places/civic-center.html").read_text(encoding="utf-8")
-        self.assertIn('data-match="location" data-value="Marin County Civic Center"', venue)
+        self.assertNotIn("marin-reach", venue)
 
     def test_projects_have_a_page_each_with_the_apps_they_name(self):
         data = json.loads((ROOT / "projects/data/projects.json").read_text(encoding="utf-8"))["projects"]
@@ -448,11 +446,9 @@ class PageTests(unittest.TestCase):
         for x in data:
             page = (ROOT / "projects" / f"{x['id']}.html").read_text(encoding="utf-8")
             self.assertEqual('id="mentions"' in page, bool(x.get("mentions")), x["id"])
-            self.assertEqual('id="reach"' in page, bool(x.get("reach")), x["id"])
+            self.assertNotIn('id="reach"', page, x["id"])  # Marin Reach is hidden on MarinOS
             if x.get("mentions"):
                 self.assertIn(f"monitors/project-{x['id']}.json", page)
-            if x.get("reach"):
-                self.assertIn('data-match="project"', page)
 
     def test_places_and_districts_point_at_each_other(self):
         place = lambda name: (ROOT / "places" / name).read_text(encoding="utf-8")
