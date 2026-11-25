@@ -485,6 +485,53 @@ function programPage(p) {
   return shell(p.name, p.description ? cleanText(p.description) : `Program of the ${county.name}.`, crumbs, body);
 }
 
+// ---- Census: the numbers for a place, from the statistics in marin-data ----
+// American Community Survey 5-year estimates (marin-data output/statistics). A place's About tab shows the same headline
+// measures as the table in Marin Census (headlineMeasures in marin-census/topics.json), each with its margin of error, and
+// links to the place in Marin Census. Nothing is rounded or calculated here beyond showing the published number.
+const CENSUS_URL = 'https://marincountygov.github.io/marin-census/';
+const CENSUS_FACTS = ['population-total', 'median-age', 'population-under-18', 'population-65-plus', 'median-household-income', 'poverty-rate', 'median-gross-rent', 'rent-burden-rate', 'disability-rate', 'households-without-internet-rate'];
+function loadCensus() {
+  const dir = path.join(budget.dataDir(), 'statistics');
+  const files = ['variables.jsonld', 'datasets.jsonld', path.join('observations', 'acs-2024-5yr', 'county.jsonld'), path.join('observations', 'acs-2024-5yr', 'places.jsonld')];
+  if (!files.every((f) => fs.existsSync(path.join(dir, f)))) return null;
+  const graph = (f) => JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8'))['@graph'];
+  const names = new Map(graph('variables.jsonld').map((v) => [v['@id'], v.name]));
+  const dataset = graph('datasets.jsonld')[0];
+  const byPlace = new Map();
+  for (const f of files.slice(2)) {
+    for (const o of graph(f)) {
+      const id = o.variableMeasured['@id'];
+      const key = id.split('/').pop();
+      if (!CENSUS_FACTS.includes(key)) continue;
+      const place = byPlace.get(o.observationAbout['@id']) || new Map();
+      place.set(key, { name: names.get(id), unit: o.unitText, value: o.value, min: o.minValue, max: o.maxValue, margin: o.marginOfError && o.marginOfError.value });
+      byPlace.set(o.observationAbout['@id'], place);
+    }
+  }
+  const named = (dataset.name || '').replace(/(\d{4})-(\d{4})/, '$1–$2');
+  return { byPlace, source: { label: `${dataset.publisher.name}, ${named}`, url: dataset.url || '' } };
+}
+const census = loadCensus();
+const grouped = (n) => Math.round(n).toLocaleString('en-US');
+const fixed = (n, digits) => n.toLocaleString('en-US', { minimumFractionDigits: digits, maximumFractionDigits: digits });
+const censusNumber = (unit, n) => (unit === 'USD' ? `$${grouped(n)}` : unit === 'percent' ? `${fixed(n, 1)}%` : unit === 'years' ? fixed(n, 1) : unit === 'persons per household' ? fixed(n, 2) : grouped(n));
+function censusText(m) {
+  if (m.value !== undefined) return m.margin !== undefined ? `${censusNumber(m.unit, m.value)} ± ${censusNumber(m.unit, m.margin)}` : censusNumber(m.unit, m.value);
+  if (m.min !== undefined) return `${censusNumber(m.unit, m.min)} or more`;
+  return `${censusNumber(m.unit, m.max)} or less`;
+}
+// The Census section of a place's About tab, or an empty string for a place with no statistics (a district, a facility).
+function censusSection(e) {
+  const values = census && census.byPlace.get(e.rec['@id']);
+  if (!values) return '';
+  const rows = CENSUS_FACTS.filter((id) => values.has(id)).map((id) => `<dt>${esc(values.get(id).name)}</dt><dd>${esc(censusText(values.get(id)))}</dd>`);
+  if (!rows.length) return '';
+  const source = census.source.url ? `<a href="${esc(census.source.url)}">${esc(census.source.label)}</a>` : esc(census.source.label);
+  return `<section class="section" aria-labelledby="census-heading"><h2 id="census-heading">Census</h2><dl class="org-facts">${rows.join('')}</dl>` +
+    `<p>Source: ${source}</p><p><a href="${CENSUS_URL}?place=${encodeURIComponent(e.slug)}">All ${esc(e.label)} Census statistics</a></p></section>`;
+}
+
 // ---- Places: a page for each jurisdiction and facility ----
 // A place is a territory (a district, a city or town, an unincorporated community, the county) or a facility
 // (a building or site). Both come from marin-data. Paths are from the docs root.
@@ -585,7 +632,7 @@ function placePage(e) {
   const jsonTabs = ['about', 'data', ...dataTabs.map(([id]) => id)];
   const head = `<article class="content"><h1 class="doc-title">${esc(e.label)}</h1>${tabNav}${actions('place-' + e.slug, 'article.content', true, [], { content: tabIds, json: jsonTabs })}`;
   const content = head + dashboard +
-    `<div id="about" data-tab-section="about" hidden><section class="section" aria-labelledby="about-heading"><h2 id="about-heading">About</h2><dl class="org-facts">${facts.join('')}</dl></section></div>` +
+    `<div id="about" data-tab-section="about" hidden><section class="section" aria-labelledby="about-heading"><h2 id="about-heading">About</h2><dl class="org-facts">${facts.join('')}</dl></section>${censusSection(e)}</div>` +
     (subPlaces.length ? list('places', 'Places', subPlaces) : '') + (subFacilities.length ? list('facilities', 'Facilities', subFacilities) : '') +
     appTabSections(related) +
     (seats.length ? `<section class="section" id="people" data-tab-section="people" aria-labelledby="people-heading" hidden><h2 id="people-heading">People</h2><ul class="search-results-list" aria-label="People">${seats.map(seatCard).join('')}</ul></section>` : '') +

@@ -39,6 +39,8 @@ The data also holds programs, people, posts and roles (`programs.jsonld`, `peopl
 
 The Budget and Capital improvement plan pages are in [marin-budget](https://github.com/marincountygov/marin-budget) (https://marincountygov.github.io/marin-budget/). The Budget tab on organization, service area and program pages stays here. It reads the budget files in `../marin-data/output` (`budgets.jsonld`, `budget-lines.jsonld`, `source/budget-display.json`, `funds.jsonld`, `sources.json` and `budget-2025-26/schedules.json`) when `node scripts/build-organization.js` runs; it keeps no copy of them. To read another folder, run `node scripts/build-organization.js <folder with the files>` or set `MARIN_DATA_OUTPUT`. `scripts/budget-data.js` builds the tables and `scripts/budget-2025-org.js` adds the FY 2025-26 Final Budget rows. Links from a Budget tab to a fund page, a schedule or the budget data are absolute links to marin-budget (`BUDGET_SITE` in `scripts/budget-data.js`).
 
+A place's About tab has a Census section: the headline measures of Marin Census (`CENSUS_FACTS` in `scripts/build-organization.js`, the same as `headlineMeasures` in `marin-census/topics.json`) with their margins of error, the source, and a link to the place in Marin Census. They are read from `output/statistics/` in marin-data when the pages are built, for the places that have a Census area (the county, the cities and towns, and the Census-designated places). A district, an area, a region or a facility has none.
+
 ## Keeping in step with marin-data
 
 The files in `organization/data/` are copies. `marin-data.lock` names the marin-data commit this app last used, and the Data sync workflow pushes a `data-sync` branch when marin-data changes. See marin-data's README.

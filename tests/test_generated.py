@@ -374,6 +374,34 @@ class PageTests(unittest.TestCase):
                     ok = target.is_file() or (target.is_dir() and (target / "index.html").is_file())
                     self.assertTrue(ok, f"{name}: {ref} does not exist")
 
+    def test_a_place_with_census_statistics_shows_them_in_its_about_tab(self):
+        data = ROOT / "organization" / "data"
+        records = json.loads((data / "jurisdictions.jsonld").read_text(encoding="utf-8"))["@graph"]
+        code = lambda r: next(i["value"] for i in r["identifier"] if i["propertyID"] == "gs:local")
+        with_geoid = {code(r) for r in records if any(i["propertyID"] == "census-geoid" for i in r.get("identifier", []))}
+        self.assertGreater(len(with_geoid), 20, "the county, the cities and towns and the Census-designated places")
+        for stem in ("novato", "marin-county", "bolinas"):
+            self.assertIn(stem, with_geoid)
+        for page in (ROOT / "places").glob("*.html"):
+            if page.name == "index.html":
+                continue
+            html = page.read_text(encoding="utf-8")
+            about = re.search(r'<div id="about" data-tab-section="about" hidden>(.*?)</div><', html, re.S)
+            self.assertIsNotNone(about, f"{page.name} has an About tab")
+            has = 'id="census-heading"' in about.group(1)
+            if page.stem not in with_geoid:
+                self.assertFalse(has, f"{page.name} has no Census area, so no Census section")
+                continue
+            self.assertTrue(has, f"{page.name} shows its Census statistics in the About tab")
+            census = re.search(r'<section class="section" aria-labelledby="census-heading">(.*?)</section>', about.group(1), re.S).group(1)
+            self.assertIn("<dt>Total population</dt>", census)
+            self.assertRegex(census, r"<dt>Total population</dt><dd>[\d,]+( \u00b1 [\d,]+)?</dd>")
+            self.assertIn("American Community Survey 5-year estimates, 2020\u20132024", census)
+            self.assertNotRegex(census, r"(?i)margin of error|confidence")
+            self.assertIn(f'href="https://marincountygov.github.io/marin-census/?place={page.stem}"', census)
+        self.assertNotIn("census-heading", (ROOT / "places/marin-district-3.html").read_text(encoding="utf-8"))
+        self.assertNotIn("census-heading", (ROOT / "places/civic-center.html").read_text(encoding="utf-8"))
+
     def test_places_have_a_page_each_and_the_index_lists_them_a_to_z(self):
         natural = lambda t: [int(p) if p.isdigit() else p for p in re.split(r"(\d+)", t.casefold())]
         data = ROOT / "organization" / "data"
