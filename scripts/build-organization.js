@@ -379,11 +379,11 @@ function orgPage(o) {
   const head = `<article class="content"><h1 class="doc-title">${esc(o.name)}</h1>${tabNav}${actions(slugOf(o['@id']), 'article.content', true, csvs, { content: tabIds, json: jsonTabs })}`;
   const body = head + dashboard +
     '<div id="about" data-tab-section="about" hidden>' +
-    `<section class="section" aria-labelledby="about-heading"><h2 id="about-heading">About</h2><dl class="org-facts">${overview.join('')}</dl></section>` +
+    `<section class="section" aria-labelledby="about-heading"><h2 id="about-heading">About</h2><dl class="details">${overview.join('')}</dl></section>` +
     '</div>' + subTab + programsTab + budgetTab + peopleTab + engageTab(engage) + tabSections +
     '<div id="data" data-tab-section="data" hidden>' +
     `<section class="section" aria-labelledby="identifiers"><h2 id="identifiers">Identifiers</h2><table><thead><tr><th scope="col">Name</th><th scope="col">Value</th><th scope="col">Scheme</th></tr></thead><tbody>${ids}</tbody></table></section>` +
-    `<section class="section" aria-labelledby="record"><h2 id="record">Record</h2><dl class="org-facts">${record.join('')}</dl></section>` +
+    `<section class="section" aria-labelledby="record"><h2 id="record">Record</h2><dl class="details">${record.join('')}</dl></section>` +
     `<section class="section" aria-labelledby="source"><h2 id="source">Source</h2><ul><li><a href="./data/organizations.jsonld">Organization data (JSON-LD)</a></li>${ownPrograms.length ? '<li><a href="./data/programs.jsonld">Program data (JSON-LD)</a></li>' : ''}${seats.length ? '<li><a href="./data/roles.jsonld">Role data (JSON-LD)</a>, <a href="./data/posts.jsonld">posts</a> and <a href="./data/people.jsonld">people</a></li>' : ''}</ul>${sources.budgetBook ? `<p>Descriptions, missions, programs and contacts come from the ${esc(sources.budgetBook.title)}.</p>` : ''}</section>` +
     jsonBlock({ about: [o], data: [o], ...(subTab ? { [subId]: kids } : {}), programs: ownPrograms, budget: budget.linesFor(budgetData, o['@id']) }, './page-data.js', csvs) + '</div>' + '</article>';
 
@@ -431,18 +431,18 @@ function serviceAreaPage(a) {
   if (a.description) aboutFacts.push(row('Description', esc(cleanDescription(a.description))));
   if (a.mission) aboutFacts.push(row('Mission', esc(cleanMission(a.mission))));
   if (kids.length) aboutFacts.push(row('Departments', `<ul class="org-dash__list">${kids.map((k) => `<li><a href="${rel('service-areas', urlOf(k))}">${esc(k.name)}</a></li>`).join('')}</ul>`));
-  const aboutTab = `<div id="about" data-tab-section="about" hidden><section class="section" aria-labelledby="about-heading"><h2 id="about-heading">About</h2><dl class="org-facts">${aboutFacts.join('')}</dl></section></div>`;
+  const aboutTab = `<div id="about" data-tab-section="about" hidden><section class="section" aria-labelledby="about-heading"><h2 id="about-heading">About</h2><dl class="details">${aboutFacts.join('')}</dl></section></div>`;
   // Dashboard: a tight look at the other tabs, each with a link. With no budget it shows About.
   const areaPrograms = programsDash(own, 'service-areas');
   const dashboard = `<div id="dashboard" data-tab-section="dashboard" data-no-copy><div class="org-dashboard">` + (b
     ? `<section class="org-dash" aria-labelledby="dash-budget"><h2 id="dash-budget">Budget</h2><div class="mm-stats-kpis">${budget.kpi('Expenditures, FY 2026-27', budget.millions(budget.val(b.totals[2])))}${b.ad ? budget.kpi('Full-time equivalent staff', budget.fteText(b.ad.sa.fte_fy2026_27)) : ''}</div><p class="org-dash__more"><a href="#budget">Budget</a></p></section>`
-    : `<section class="org-dash" aria-labelledby="dash-about"><h2 id="dash-about">About</h2><dl class="org-facts">${aboutFacts.join('')}</dl><p class="org-dash__more"><a href="#about">About</a></p></section>`) + areaPrograms + `</div></div>`;
+    : `<section class="org-dash" aria-labelledby="dash-about"><h2 id="dash-about">About</h2><dl class="details">${aboutFacts.join('')}</dl><p class="org-dash__more"><a href="#about">About</a></p></section>`) + areaPrograms + `</div></div>`;
   const tabNav = `<nav id="app-nav" class="org-tabs" aria-label="Sections"><a href="#dashboard">Dashboard</a><a href="#about">About</a><a href="#programs">Programs</a>${b ? '<a href="#budget">Budget</a>' : ''}<a href="#data">Data</a></nav>`;
   const body = `<article class="content"><h1 class="doc-title">${esc(a.name)}</h1>${tabNav}${actions('service-area-' + areaSlug(a), 'article.content', true, csvs, { content: ['about', 'programs', b ? 'budget' : '', 'data'].filter(Boolean), json: ['about', 'programs', b ? 'budget' : '', 'data'].filter(Boolean) })}` +
     dashboard + aboutTab +
     `<section class="section" id="programs" data-tab-section="programs" aria-labelledby="programs-heading" hidden><h2 id="programs-heading">Programs</h2><ul class="search-results-list" aria-label="Programs">${own.map((p) => programCard(p, 'service-areas')).join('')}</ul></section>` +
     budgetTab +
-    `<div id="data" data-tab-section="data" hidden><section class="section" aria-labelledby="record"><h2 id="record">Record</h2><dl class="org-facts">${row('Record id', `<code>${esc(a['@id'])}</code>`)}${row('Record type', `<code>${esc(a['@type'])}</code>`)}</dl></section>` +
+    `<div id="data" data-tab-section="data" hidden><section class="section" aria-labelledby="record"><h2 id="record">Record</h2><dl class="details">${row('Record id', `<code>${esc(a['@id'])}</code>`)}${row('Record type', `<code>${esc(a['@type'])}</code>`)}</dl></section>` +
     `<section class="section" aria-labelledby="source"><h2 id="source">Source</h2><ul><li><a href="../organization/data/organizations.jsonld">Organization data (JSON-LD)</a></li><li><a href="../organization/data/programs.jsonld">Program data (JSON-LD)</a></li>${b ? `<li><a href="${budget.BUDGET_SITE}budget/data/budget-lines.jsonld">Budget lines (JSON-LD)</a></li>` : ''}</ul>${sources.budgetBook ? `<p class="app-help-text">Descriptions and programs come from the ${esc(sources.budgetBook.title)}.</p>` : ''}</section></div>` +
     jsonBlock({ about: [a, ...kids], programs: own, budget: b ? budget.linesFor(budgetData, a['@id']) : [], data: [a] }, '../organization/page-data.js', csvs) + '</article>';
   return shell(a.name, `Service area of the ${county.name}.`, [['Marin Pulse', '../index.html'], ['Service areas', './index.html'], [a.name, null]], body, ICON_LAYERS);
@@ -472,64 +472,86 @@ function programPage(p) {
   // The Dashboard is a tight look at the other tabs, each with a link to the tab. A program with no figures in the book has only About.
   const dashboard = `<div id="dashboard" data-tab-section="dashboard"><div class="org-dashboard">` + (kpis
     ? `<section class="org-dash" aria-labelledby="dash-budget"><h2 id="dash-budget">Budget</h2>${kpis}<p class="org-dash__more"><a href="#budget">Budget</a></p></section>`
-    : `<section class="org-dash" aria-labelledby="dash-about"><h2 id="dash-about">About</h2><dl class="org-facts">${facts.join('')}</dl><p class="org-dash__more"><a href="#about">About</a></p></section>`) + `</div></div>`;
+    : `<section class="org-dash" aria-labelledby="dash-about"><h2 id="dash-about">About</h2><dl class="details">${facts.join('')}</dl><p class="org-dash__more"><a href="#about">About</a></p></section>`) + `</div></div>`;
   const rowsCsv = budgetTab ? budget.programCsv(budgetData, p) : null;
   const csvs = rowsCsv ? [{ id: 'table', label: 'budget', rows: rowsCsv, tab: 'budget' }] : [];
   const tabs = ['about', budgetTab && 'budget', 'data'].filter(Boolean);
   const body = `<article class="content"><h1 class="doc-title">${esc(p.name)}</h1>${tabNav}${actions(slugOf(p['@id']), 'article.content', true, csvs, { content: tabs, json: tabs })}` + dashboard +
-    `<div id="about" data-tab-section="about" hidden><section class="section" aria-labelledby="about-heading"><h2 id="about-heading">About</h2><dl class="org-facts">${facts.join('')}${p.description ? row('Description', esc(cleanText(p.description))) : ''}</dl></section></div>` +
+    `<div id="about" data-tab-section="about" hidden><section class="section" aria-labelledby="about-heading"><h2 id="about-heading">About</h2><dl class="details">${facts.join('')}${p.description ? row('Description', esc(cleanText(p.description))) : ''}</dl></section></div>` +
     budgetTab +
-    `<div id="data" data-tab-section="data" hidden><section class="section" aria-labelledby="record"><h2 id="record">Record</h2><dl class="org-facts">${record.join('')}</dl></section>` +
+    `<div id="data" data-tab-section="data" hidden><section class="section" aria-labelledby="record"><h2 id="record">Record</h2><dl class="details">${record.join('')}</dl></section>` +
     `<section class="section" aria-labelledby="source"><h2 id="source">Source</h2><ul><li><a href="../organization/data/programs.jsonld">Program data (JSON-LD)</a></li>${budgetTab ? `<li><a href="${budget.BUDGET_SITE}budget/data/budget-lines.jsonld">Budget lines (JSON-LD)</a></li>` : ''}</ul>${sources.budgetBook ? `<p class="app-help-text">Descriptions and programs come from the ${esc(sources.budgetBook.title)}.</p>` : ''}</section></div>` +
     jsonBlock({ about: [p], data: [p], budget: budgetTab ? (budgetData.byProgram.get(p['@id']) || []) : [] }, '../organization/page-data.js', csvs) + '</article>';
   return shell(p.name, p.description ? cleanText(p.description) : `Program of the ${county.name}.`, crumbs, body);
 }
 
 // ---- Census: the numbers for a place, from the statistics in marin-data ----
-// American Community Survey 5-year estimates (marin-data output/statistics). A place's About tab shows the same headline
-// measures as the table in Marin Census (headlineMeasures in marin-census/topics.json), each with its margin of error, and
-// links to the place in Marin Census. Nothing is rounded or calculated here beyond showing the published number.
+// American Community Survey 5-year estimates (marin-data output/statistics). A place's About tab shows what its page in
+// Marin Census shows: one table for each topic, the same measures in the same order (topics.json, kept in marin-data), each
+// with its margin of error and what it is out of, and a value the Census does not give as "Not available" with its reason.
+// Nothing is rounded or calculated here beyond showing the published number.
 const CENSUS_URL = 'https://marincountygov.github.io/marin-census/';
-const CENSUS_FACTS = ['population-total', 'median-age', 'population-under-18', 'population-65-plus', 'median-household-income', 'poverty-rate', 'median-gross-rent', 'rent-burden-rate', 'disability-rate', 'households-without-internet-rate'];
 function loadCensus() {
   const dir = path.join(budget.dataDir(), 'statistics');
-  const files = ['variables.jsonld', 'datasets.jsonld', path.join('observations', 'acs-2024-5yr', 'county.jsonld'), path.join('observations', 'acs-2024-5yr', 'places.jsonld')];
+  const files = ['variables.jsonld', 'datasets.jsonld', 'topics.json', path.join('observations', 'acs-2024-5yr', 'county.jsonld'), path.join('observations', 'acs-2024-5yr', 'places.jsonld')];
   if (!files.every((f) => fs.existsSync(path.join(dir, f)))) return null;
-  const graph = (f) => JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8'))['@graph'];
-  const names = new Map(graph('variables.jsonld').map((v) => [v['@id'], v.name]));
+  const read = (f) => JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8'));
+  const graph = (f) => read(f)['@graph'];
+  const tail = (iri) => iri.split('/').pop();
+  const variables = new Map(graph('variables.jsonld').map((v) => [tail(v['@id']), { id: tail(v['@id']), name: v.name, denominator: v.measurementDenominator && tail(v.measurementDenominator['@id']) }]));
   const dataset = graph('datasets.jsonld')[0];
+  const topics = read('topics.json').topics;
   const byPlace = new Map();
-  for (const f of files.slice(2)) {
+  for (const f of files.slice(3)) {
     for (const o of graph(f)) {
-      const id = o.variableMeasured['@id'];
-      const key = id.split('/').pop();
-      if (!CENSUS_FACTS.includes(key)) continue;
       const place = byPlace.get(o.observationAbout['@id']) || new Map();
-      place.set(key, { name: names.get(id), unit: o.unitText, value: o.value, min: o.minValue, max: o.maxValue, margin: o.marginOfError && o.marginOfError.value });
+      place.set(tail(o.variableMeasured['@id']), { unit: o.unitText, value: o.value, min: o.minValue, max: o.maxValue, margin: o.marginOfError && o.marginOfError.value });
       byPlace.set(o.observationAbout['@id'], place);
     }
   }
+  // Why a value is not given, kept beside the statistics in marin-data (statistics/omitted-values.json).
+  const omittedFile = path.join(budget.dataDir(), '..', 'statistics', 'omitted-values.json');
+  const reasons = new Map();
+  if (fs.existsSync(omittedFile)) for (const x of JSON.parse(fs.readFileSync(omittedFile, 'utf8')).omitted) reasons.set(`${x.area}|${x.variable}`, x.reason);
   const named = (dataset.name || '').replace(/(\d{4})-(\d{4})/, '$1–$2');
-  return { byPlace, source: { label: `${dataset.publisher.name}, ${named}`, url: dataset.url || '' } };
+  return { byPlace, variables, topics, reasons, source: { label: `${dataset.publisher.name}, ${named}`, url: dataset.url || '' } };
 }
 const census = loadCensus();
 const grouped = (n) => Math.round(n).toLocaleString('en-US');
 const fixed = (n, digits) => n.toLocaleString('en-US', { minimumFractionDigits: digits, maximumFractionDigits: digits });
 const censusNumber = (unit, n) => (unit === 'USD' ? `$${grouped(n)}` : unit === 'percent' ? `${fixed(n, 1)}%` : unit === 'years' ? fixed(n, 1) : unit === 'persons per household' ? fixed(n, 2) : grouped(n));
-function censusText(m) {
-  if (m.value !== undefined) return m.margin !== undefined ? `${censusNumber(m.unit, m.value)} ± ${censusNumber(m.unit, m.margin)}` : censusNumber(m.unit, m.value);
-  if (m.min !== undefined) return `${censusNumber(m.unit, m.min)} or more`;
-  return `${censusNumber(m.unit, m.max)} or less`;
+// A value as Marin Census shows it: the text, and beside it the margin of error (an estimate) or nothing (a bound).
+function censusEntry(m) {
+  if (!m) return { kind: 'missing', text: 'Not available', margin: '' };
+  if (m.value !== undefined) return { kind: 'estimate', text: censusNumber(m.unit, m.value), margin: m.margin !== undefined ? `± ${censusNumber(m.unit, m.margin)}` : '' };
+  if (m.min !== undefined) return { kind: 'bound', text: `${censusNumber(m.unit, m.min)} or more`, margin: '' };
+  return { kind: 'bound', text: `${censusNumber(m.unit, m.max)} or less`, margin: '' };
 }
 // The Census section of a place's About tab, or an empty string for a place with no statistics (a district, a facility).
 function censusSection(e) {
-  const values = census && census.byPlace.get(e.rec['@id']);
+  const iri = e.rec['@id'];
+  const values = census && census.byPlace.get(iri);
   if (!values) return '';
-  const rows = CENSUS_FACTS.filter((id) => values.has(id)).map((id) => `<dt>${esc(values.get(id).name)}</dt><dd>${esc(censusText(values.get(id)))}</dd>`);
-  if (!rows.length) return '';
+  const level = '90%'; // the confidence level of the ACS margins of error, as in Marin Census (confidenceLevel in the data)
+  const cell = (id) => {
+    const v = census.variables.get(id);
+    const entry = censusEntry(values.get(id));
+    const reason = entry.kind === 'missing' ? census.reasons.get(`${iri}|${id}`) : '';
+    return { v, entry, html: `<td class="census-cell census-cell--${entry.kind}"><span class="census-value">${esc(entry.text)}</span>${reason ? `<span class="census-margin">${esc(reason)}</span>` : ''}</td>` };
+  };
+  const topics = census.topics.map((topic) => {
+    const rows = topic.measures.map((id) => {
+      const { v, entry, html } = cell(id);
+      const out = v.denominator ? cell(v.denominator) : null;
+      const outCell = out ? `<td><span class="census-value">${esc(out.entry.text)}</span><span class="census-margin">${esc(out.v.name)}</span></td>` : '<td></td>';
+      return `<tr><th scope="row">${esc(v.name)}</th>${html}<td>${esc(entry.margin)}</td>${outCell}</tr>`;
+    });
+    const head = ['Measure', 'Estimate', `Margin of error (${level})`, 'Out of'].map((t) => `<th scope="col">${t}</th>`).join('');
+    return `<section class="place-topic"><h3>${esc(topic.name)}</h3><div class="table-scroll"><table><caption class="visually-hidden">${esc(e.label)}: ${esc(topic.name)}</caption><thead><tr>${head}</tr></thead><tbody>${rows.join('')}</tbody></table></div></section>`;
+  });
   const source = census.source.url ? `<a href="${esc(census.source.url)}">${esc(census.source.label)}</a>` : esc(census.source.label);
-  return `<section class="section" aria-labelledby="census-heading"><h2 id="census-heading">Census</h2><dl class="org-facts">${rows.join('')}</dl>` +
-    `<p>Source: ${source}</p><p><a href="${CENSUS_URL}?place=${encodeURIComponent(e.slug)}">All ${esc(e.label)} Census statistics</a></p></section>`;
+  return `<section class="section" aria-labelledby="census-heading"><h2 id="census-heading">Census</h2>${topics.join('')}` +
+    `<p>Source: ${source}</p><p><a href="${CENSUS_URL}?place=${encodeURIComponent(e.slug)}">${esc(e.label)} in Marin Census</a></p></section>`;
 }
 
 // ---- Places: a page for each jurisdiction and facility ----
@@ -632,13 +654,13 @@ function placePage(e) {
   const jsonTabs = ['about', 'data', ...dataTabs.map(([id]) => id)];
   const head = `<article class="content"><h1 class="doc-title">${esc(e.label)}</h1>${tabNav}${actions('place-' + e.slug, 'article.content', true, [], { content: tabIds, json: jsonTabs })}`;
   const content = head + dashboard +
-    `<div id="about" data-tab-section="about" hidden><section class="section" aria-labelledby="about-heading"><h2 id="about-heading">About</h2><dl class="org-facts">${facts.join('')}</dl></section>${censusSection(e)}</div>` +
+    `<div id="about" data-tab-section="about" hidden><section class="section" aria-labelledby="about-heading"><h2 id="about-heading">About</h2><dl class="details">${facts.join('')}</dl></section>${censusSection(e)}</div>` +
     (subPlaces.length ? list('places', 'Places', subPlaces) : '') + (subFacilities.length ? list('facilities', 'Facilities', subFacilities) : '') +
     appTabSections(related) +
     (seats.length ? `<section class="section" id="people" data-tab-section="people" aria-labelledby="people-heading" hidden><h2 id="people-heading">People</h2><ul class="search-results-list" aria-label="People">${seats.map(seatCard).join('')}</ul></section>` : '') +
     '<div id="data" data-tab-section="data" hidden>' +
     `<section class="section" aria-labelledby="identifiers"><h2 id="identifiers">Identifiers</h2><table><thead><tr><th scope="col">Name</th><th scope="col">Value</th><th scope="col">Scheme</th></tr></thead><tbody>${ids}</tbody></table></section>` +
-    `<section class="section" aria-labelledby="record"><h2 id="record">Record</h2><dl class="org-facts">${record.join('')}</dl></section>` +
+    `<section class="section" aria-labelledby="record"><h2 id="record">Record</h2><dl class="details">${record.join('')}</dl></section>` +
     `<section class="section" aria-labelledby="source"><h2 id="source">Source</h2><ul><li><a href="../organization/data/${dataFile}.jsonld">${e.kind === 'facility' ? 'Facility' : 'Jurisdiction'} data (JSON-LD)</a></li></ul></section>` +
     jsonBlock({ about: [r], data: [r], ...(subPlaces.length ? { places: subPlaces.map((x) => x.rec) } : {}), ...(subFacilities.length ? { facilities: subFacilities.map((x) => x.rec) } : {}) }, '../organization/page-data.js', []) + '</div>' + '</article>';
   const crumbs = [['Marin Pulse', '../index.html'], ['Places', './index.html']];
@@ -668,10 +690,10 @@ function projectPage(x) {
   const tabIds = ['about', ...(engage.length ? ['engage'] : []), ...related.map((r) => r.home.id), 'data'];
   const head = `<article class="content"><h1 class="doc-title">${esc(x.name)}</h1>${tabNav}${actions('project-' + x.id, 'article.content', true, [], { content: tabIds, json: ['about', 'data'] })}`;
   const content = head + dashboard +
-    `<div id="about" data-tab-section="about" hidden><section class="section" aria-labelledby="about-heading"><h2 id="about-heading">About</h2><dl class="org-facts">${facts.join('')}</dl></section></div>` +
+    `<div id="about" data-tab-section="about" hidden><section class="section" aria-labelledby="about-heading"><h2 id="about-heading">About</h2><dl class="details">${facts.join('')}</dl></section></div>` +
     engageTab(engage) + appTabSections(related) +
     '<div id="data" data-tab-section="data" hidden>' +
-    `<section class="section" aria-labelledby="record"><h2 id="record">Record</h2><dl class="org-facts">${row('Project id', `<code>${esc(x.id)}</code>`)}</dl></section>` +
+    `<section class="section" aria-labelledby="record"><h2 id="record">Record</h2><dl class="details">${row('Project id', `<code>${esc(x.id)}</code>`)}</dl></section>` +
     `<section class="section" aria-labelledby="source"><h2 id="source">Source</h2><ul><li><a href="data/projects.json">Projects data (JSON)</a></li></ul></section>` +
     jsonBlock({ about: [x], data: [x] }, '../organization/page-data.js', []) + '</div>' + '</article>';
   return shell(x.name, `${x.name}, a project of the County of Marin.`, [['Marin Pulse', '../index.html'], ['Projects', './index.html'], [x.name, null]], content, ICON_TIMELINE);
