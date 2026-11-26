@@ -6,7 +6,9 @@
     <title>Marin Pulse | County of Marin</title><link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Crect width='48' height='48' rx='10' fill='%23000'/%3E%3Cg fill='none' stroke='%23e5b53b' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round' transform='translate(9,9) scale(1.25)'%3E%3Cpath d='M12 17v4'/%3E%3Cpath d='M18 10h-2.315a1 1 0 00-.932.64l-.787 2.034a.5.5 0 01-.932 0l-2.068-5.348a.5.5 0 00-.932 0l-.787 2.035a1 1 0 01-.932.639H6'/%3E%3Cpath d='M8 21h8'/%3E%3Crect x='2' y='3' width='20' height='14' rx='2'/%3E%3C/g%3E%3C/svg%3E">
     <meta name="description" content="Find County of Marin departments, service areas, programs and places.">
     <link rel="stylesheet" href="vendor/marinos/marinos.css">
+    <link rel="stylesheet" href="home-search.css">
     <script src="vendor/marinos/marinos.js" defer></script>
+    <script src="home-search.js" defer></script>
   </head>
   <body data-app-id="marin-pulse">
     <a class="skip-link" href="#main">Skip to main content</a>
@@ -21,11 +23,18 @@
     </marin-app-header>
     <main id="main" class="docs-main" tabindex="-1">
       <div id="app-status-message" class="visually-hidden" role="status" aria-live="polite"></div>
-      <section class="docs-grid" aria-label="Collections" data-tab-section="directory">
+      <section class="docs-directory" aria-label="Collections" data-tab-section="directory">
+        <search class="home-search" id="home-search" aria-label="Search Marin Pulse" hidden>
+          <div class="search-input-field"><label for="home-search-input">Search</label><input type="search" id="home-search-input" autocomplete="off" placeholder="An office, a program, a place, a service"></div>
+          <div class="mm-results-summary"><p class="app-help-text" id="home-search-status" role="status" aria-live="polite"></p></div>
+          <div class="home-search__results" id="home-search-results"></div>
+        </search>
+        <div class="docs-grid" id="docs-collections">
         <article class="app-card"><span class="app-card__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/></svg></span><h3><a href="./organization/">Organization</a></h3><p>County of Marin departments, offices and other bodies, with their divisions.</p></article>
         <article class="app-card"><span class="app-card__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12"/><path d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17"/></svg></span><h3><a href="./service-areas/">Service areas</a></h3><p>The groups of departments that make up the County, with the programs of each.</p></article>
         <article class="app-card"><span class="app-card__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg></span><h3><a href="./places/">Places</a></h3><p>The districts, cities and towns, communities and facilities of the County, with their news and outreach.</p></article>
         <article class="app-card"><span class="app-card__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 12h.01"/><path d="M4 16h.01"/><path d="M4 20h.01"/><path d="M4 4h.01"/><path d="M4 8h.01"/><path d="M9.414 13.414a2 2 0 0 0 1.414.586H19a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1h-8.172a2 2 0 0 0-1.414.586L8 12z"/><path d="M9.414 21.414a2 2 0 0 0 1.414.586H19a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1h-8.172a2 2 0 0 0-1.414.586L8 20z"/><path d="M9.414 5.414A2 2 0 0 0 10.828 6H19a1 1 0 0 0 1-1V3a1 1 0 0 0-1-1h-8.172a2 2 0 0 0-1.414.586L8 4z"/></svg></span><h3><a href="./projects/">Projects</a></h3><p>The projects of the County, with their news and outreach.</p></article>
+              </div>
       </section>
 
       <marin-app-info
