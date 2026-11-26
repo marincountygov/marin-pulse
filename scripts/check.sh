@@ -47,6 +47,7 @@ if command -v node >/dev/null 2>&1; then
   node --check "$ROOT_DIR/scripts/budget-2025-org.js"
   node --check "$ROOT_DIR/scripts/clean-text.js"
   node --check "$ROOT_DIR/scripts/budget-data.js"
+  node --check "$ROOT_DIR/home-search.js"
   node --test "$ROOT_DIR/tests/clean-text.test.js" "$ROOT_DIR/tests/budget-data.test.js"
   python3 "$ROOT_DIR/tests/test_generated.py"
 else
@@ -54,7 +55,7 @@ else
 fi
 
 if [[ "$RUN_BROWSER" == 1 ]]; then
-  printf 'SKIP: This app has no browser tests.\n'
+  python3 "$ROOT_DIR/tests/browser_home_search.py"
 else
   printf 'SKIP: Browser tests not requested; run with --browser to include them.\n'
 fi
