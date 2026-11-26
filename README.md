@@ -4,7 +4,7 @@ Marin Pulse describes how the County of Marin is organized: its departments and 
 
 ## Structure
 
-- `index.html`: the home page, with a search box (`home-search.js`, `home-search.css`) and a card for each collection. The search reads `data/search-index.json`, a copy from marin-data of every organization, program, place, service and person; never edit it, run `python3 ../marin-data/scripts/sync_copies.py .`
+- `index.html`: the home page, with a search box (`home-search.js`) and a card for each collection. The search reads `data/search-index.json`, a copy from marin-data of every organization, program, place, service and person; never edit it, run `python3 ../marin-data/scripts/sync_copies.py .`
 - `organization/`: County departments, divisions and other bodies, one page each, generated from schemaGov JSON-LD, with `data/` (copies from marin-data), `links.json`, and `page-data.js`
 - `service-areas/`: the County's service areas, a page each listing its programs
 - `programs/`: a page for each program. Both are written by `scripts/build-organization.js` from the same data
